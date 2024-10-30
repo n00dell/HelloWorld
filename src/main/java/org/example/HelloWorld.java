@@ -48,7 +48,7 @@ public class HelloWorld {
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE); // the window will be resizable
 
         // Create the window
-        window = glfwCreateWindow(1000, 1000, "Hello World!", NULL, NULL);
+        window = glfwCreateWindow(500, 500, "Flag Display", NULL, NULL);
         if ( window == NULL )
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -95,7 +95,7 @@ public class HelloWorld {
         GL.createCapabilities();
         glMatrixMode (GL_PROJECTION);
         glLoadIdentity ( );
-        glOrtho (0, 500, 0, 500, 0, 0);
+        glOrtho (0, 500, 0, 500, -1, -1);
         // Set the clear color
         glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
@@ -103,21 +103,31 @@ public class HelloWorld {
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(window) ) {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
-            glColor3f(1.0f, 0.0f, 0.0f); // Red color
+            glMatrixMode(GL_MODELVIEW);
+            glLoadIdentity();
+            // Draw the original filled rectangle in world coordinates
+            glColor3f(0.2f, 0.6f, 0.9f); // Set the rectangle color to blue
             glBegin(GL_QUADS);
-            glVertex2i(0, 0);
-            glVertex2i(500, 0);
-            glVertex2i(500, 500);
-            glVertex2i(0, 500);
+            glVertex2f(0, 0);      // Bottom left
+            glVertex2f(200, 0);    // Bottom right
+            glVertex2f(200, 100);  // Top right
+            glVertex2f(0, 100);    // Top left
             glEnd();
 
-            glColor3f(0.0f, 1.0f, 0.0f); // Green color
+            // Set up the clipping viewport (200x50)
+            glViewport(0, 0, 200, 50); // Define the 200x50 viewport area
+
+            // Draw the clipped rectangle (it will display only within the 200x50 viewport)
             glBegin(GL_QUADS);
-            glVertex2i(0, 0);
-            glVertex2i(-500, 0);
-            glVertex2i(-500, -500);
-            glVertex2i(0, -500);
+            glVertex2f(0, 0);      // Bottom left
+            glVertex2f(200, 0);    // Bottom right
+            glVertex2f(200, 100);  // Top right (clipped at 50 in viewport)
+            glVertex2f(0, 100);    // Top left (clipped at 50 in viewport)
             glEnd();
+
+            // Reset viewport to cover the entire window
+            glViewport(0, 0, 500, 500);
+
 
             glfwSwapBuffers(window); // swap the color buffers
 
@@ -126,6 +136,7 @@ public class HelloWorld {
             glfwPollEvents();
         }
     }
+
 
     public static void main(String[] args) {
         new HelloWorld().run();
